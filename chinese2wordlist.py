@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+
 import sys
-from enum import Enum
 import re
+import json
+from enum import Enum
 from collections import defaultdict
 
 """
@@ -20,7 +22,6 @@ class Chinese2WordList:
         self.character_type = character_type
 
         self.search_dictionary(chinese_text)
-        self.return_word_list()
 
     def search_dictionary(self, chinese_text):
         for key, character in enumerate(chinese_text):
@@ -56,9 +57,16 @@ class Chinese2WordList:
 
         return re.compile(pattern)
 
-    def return_word_list(self):
-        for entry in self.translated_dictionary_entries.items():
-            print(entry)
+    def response(self, response_type = None):
+        if response_type is ResponseType.JSON:
+            return self._response_json()
+
+        return self.translated_dictionary_entries.items()
+
+    def _response_json(self):
+        items = sorted(self.translated_dictionary_entries.items(), key=lambda item: item[0])
+        values = [item[1] for item in items]
+        return json.dumps(values)
 
 
 class CharacterType(Enum):
@@ -67,6 +75,13 @@ class CharacterType(Enum):
     """
     TRADITIONAL = '(character) .+? \[.+?\] .+'
     SIMPLIFIED = '.+? (character) \[.+?\] .+'
+
+
+class ResponseType(Enum):
+    """
+    The allowed response types
+    """
+    JSON = 0
 
 
 if __name__ == "__main__":
@@ -78,10 +93,21 @@ if __name__ == "__main__":
         print('For traditional: chinese2wordlist.py t 我')
         exit()
 
+    response_type = ResponseType.JSON
+    try:
+        if sys.argv[3] is 'json':
+            response_type = ResponseType.JSON
+        # In case we want to add more
+
+    except IndexError:
+        pass
+
     if sys.argv[1] in ['t', 'trad', 'traditional']:
-        Chinese2WordList(CharacterType.TRADITIONAL, sys.argv[2])
+        chineseWordList = Chinese2WordList(CharacterType.TRADITIONAL, sys.argv[2])
+        print(chineseWordList.response(response_type))
     elif sys.argv[1] in ['s', 'simp', 'simplified']:
-        Chinese2WordList(CharacterType.SIMPLIFIED, sys.argv[2])
+        chineseWordList = Chinese2WordList(CharacterType.SIMPLIFIED, sys.argv[2])
+        print(chineseWordList.response(response_type))
     else:
         print('Wrong character type:', sys.argv[1])
         exit()
