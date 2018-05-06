@@ -57,16 +57,50 @@ class Chinese2WordList:
 
         return re.compile(pattern)
 
+    def _extract_line_to_definitions(self, line):
+        pattern = re.compile('(\S+)\s(\S+)\s\[(.+?)\]\s\/(.+)\/')
+        match = pattern.match(line)
+        traditional = match[1]
+        simplified = match[2]
+        pinyin = match[3]
+        definition = match[4]
+        return [traditional, simplified, pinyin, definition]
+
     def response(self, response_type = None):
+        items = sorted(self.translated_dictionary_entries.items(), key=lambda item: item[0])
+        values = [item[1] for item in items]
+        if response_type is ResponseType.MARKDOWN:
+            return self._response_markdown(values)
         if response_type is ResponseType.JSON:
-            return self._response_json()
+            return self._response_json(values)
 
         return self.translated_dictionary_entries.items()
 
-    def _response_json(self):
-        items = sorted(self.translated_dictionary_entries.items(), key=lambda item: item[0])
-        values = [item[1] for item in items]
+    def _response_json(self, values):
         return json.dumps(values)
+
+    def _response_markdown(self, values):
+        response = []
+        with open('response/markdown_header.txt', 'r') as markdown_header:
+            response.append(markdown_header.read())
+
+        for items in values:
+            for item in items:
+
+                traditional, simplified, pinyin, translation = self._extract_line_to_definitions(item)
+
+                if self.character_type is CharacterType.TRADITIONAL:
+                    character = traditional
+                else:
+                    character = simplified
+
+                response.append("| {character} | {pinyin} | {translation} |".format(
+                    character=character,
+                    pinyin=pinyin,
+                    translation=translation
+                ))
+
+        return '\n'.join(response)
 
 
 class CharacterType(Enum):
@@ -81,7 +115,8 @@ class ResponseType(Enum):
     """
     The allowed response types
     """
-    JSON = 0
+    MARKDOWN = 0
+    JSON = 1
 
 
 if __name__ == "__main__":
@@ -93,10 +128,12 @@ if __name__ == "__main__":
         print('For traditional: chinese2wordlist.py t 我')
         exit()
 
-    response_type = ResponseType.JSON
+    response_type = ResponseType.MARKDOWN
     try:
         if sys.argv[3] is 'json':
             response_type = ResponseType.JSON
+        if sys.argv[3] is 'markdown':
+            response_type = ResponseType.MARKDOWN
         # In case we want to add more
 
     except IndexError:
