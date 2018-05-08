@@ -27,6 +27,7 @@ optional arguments:
                         language to translate to (en or nl)
 
 ```
+
 ### Example
 Returns a json response, for simplified characters, in English 
 > `python chinese2wordlist.py 我是荷蘭人 `
@@ -35,10 +36,16 @@ With arguments for a markdown response, with traditional characters, in Dutch
 > `python chinese2wordlist.py 我是荷蘭人 --response-type=markdown --character-type=traditional --language=nl`
 
 Or with xargs
-> echo  '我是' | xargs python chinese2wordlist.py 
+> `echo  '我是' | xargs python chinese2wordlist.py` 
 
 With xargs from a file
-> cat 'chinese.txt' | xargs -n 1 python chinese2wordlist.py
+> `cat 'chinese.txt' | xargs -n 1 python chinese2wordlist.py`
+
+With xargs appending to a file
+> `cat input.txt |  xargs -n 1 python chinese2wordlist.py --response-type=markdown >> output.txt` 
+
+You might also want to trim the file
+> `cat input.txt | tr -d " \t\n\r" | xargs -n 1 python chinese2wordlist.py`
 
 ### Info
 

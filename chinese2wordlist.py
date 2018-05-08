@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import sys
 import re
 import json
 import argparse
@@ -19,6 +18,7 @@ class Chinese2WordList:
     language = None
     translated_dictionary_entries = defaultdict(list)
     smart_search_characters = defaultdict(list)
+    search = []
 
     def __init__(self, chinese_text, character_type, response_type, language):
         self.character_type = character_type
@@ -34,7 +34,7 @@ class Chinese2WordList:
         self._search_dictionary_via_smart_search()
 
     def _create_smart_search_list(self, key, character):
-        for items in list(self.smart_search_characters.items()):
+        for items in list(self.smart_search_characters.items())[-3:]:
             tmp = list(items[1])
             tmp.append(items[1][-1] + character)
             self.smart_search_characters[items[0]] = tmp
@@ -44,7 +44,9 @@ class Chinese2WordList:
     def _search_dictionary_via_smart_search(self):
         for items in self.smart_search_characters.items():
             for character in items[1]:
-                self._search_character_in_dictionary(items[0], character)
+                if character not in self.search:
+                    self._search_character_in_dictionary(items[0], character)
+                self.searched = character
 
     def _search_character_in_dictionary(self, key, character):
         pattern = self._generate_search_regex(character)
@@ -93,7 +95,6 @@ class Chinese2WordList:
 
         for items in values:
             for item in items:
-
                 traditional, simplified, pinyin, translation = self._extract_line_to_definitions(item)
 
                 if self.character_type == 'traditional':
