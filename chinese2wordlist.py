@@ -3,7 +3,7 @@
 import sys
 import re
 import json
-from enum import Enum
+import argparse
 from collections import defaultdict
 
 """
@@ -15,15 +15,19 @@ For example use python chinese2wordlist.py traditional 我是荷蘭人
 class Chinese2WordList:
 
     character_type = None
+    response_type = None
+    language = None
     translated_dictionary_entries = defaultdict(list)
     smart_search_characters = defaultdict(list)
 
-    def __init__(self, character_type, chinese_text):
+    def __init__(self, chinese_text, character_type, response_type, language):
         self.character_type = character_type
+        self.response_type = response_type
+        self.language = language
 
-        self.search_dictionary(chinese_text)
+        self._search_dictionary(chinese_text)
 
-    def search_dictionary(self, chinese_text):
+    def _search_dictionary(self, chinese_text):
         for key, character in enumerate(chinese_text):
             self._create_smart_search_list(key, character)
 
@@ -52,7 +56,7 @@ class Chinese2WordList:
                     self.translated_dictionary_entries[key].append(line)
 
     def _generate_search_regex(self, character):
-        pattern_string = self.character_type.value
+        pattern_string = self._get_character_type_regex()
         pattern = pattern_string.replace('character', character)
 
         return re.compile(pattern)
@@ -66,12 +70,17 @@ class Chinese2WordList:
         definition = match[4]
         return [traditional, simplified, pinyin, definition]
 
-    def response(self, response_type = None):
+    def _get_character_type_regex(self):
+        if self.character_type is 'traditional':
+            return '(character) .+? \[.+?\] .+'
+        return '.+? (character) \[.+?\] .+'
+
+    def response(self):
         items = sorted(self.translated_dictionary_entries.items(), key=lambda item: item[0])
         values = [item[1] for item in items]
-        if response_type is ResponseType.MARKDOWN:
+        if self.response_type in ['markdown', 'm']:
             return self._response_markdown(values)
-        if response_type is ResponseType.JSON:
+        if self.response_type in ['json']:
             return self._response_json(values)
 
         return self.translated_dictionary_entries.items()
@@ -81,15 +90,13 @@ class Chinese2WordList:
 
     def _response_markdown(self, values):
         response = []
-        with open('response/markdown_header.txt', 'r') as markdown_header:
-            response.append(markdown_header.read())
 
         for items in values:
             for item in items:
 
                 traditional, simplified, pinyin, translation = self._extract_line_to_definitions(item)
 
-                if self.character_type is CharacterType.TRADITIONAL:
+                if self.character_type == 'traditional':
                     character = traditional
                 else:
                     character = simplified
@@ -103,48 +110,25 @@ class Chinese2WordList:
         return '\n'.join(response)
 
 
-class CharacterType(Enum):
-    """
-    Select between Traditional or Simplified and get the correct regex to use for searching
-    """
-    TRADITIONAL = '(character) .+? \[.+?\] .+'
-    SIMPLIFIED = '.+? (character) \[.+?\] .+'
-
-
-class ResponseType(Enum):
-    """
-    The allowed response types
-    """
-    MARKDOWN = 0
-    JSON = 1
-
-
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Convert Chinese text to a word list')
+    parser.add_argument('chinese',
+                        metavar='chinese',
+                        help='chinese text')
+    parser.add_argument('--character-type',
+                        metavar='(traditional or simplified)',
+                        default='simplified',
+                        help='traditional or simplified')
+    parser.add_argument('--response-type',
+                        metavar='json or markdown',
+                        default='json',
+                        help='return type (json or markdown)')
+    parser.add_argument('--language',
+                        metavar='(en or nl)',
+                        default='en',
+                        help='language to translate to (en or nl)')
 
-    if len(sys.argv) < 3:
-        print('Incorrect arguments')
-        print('Specify if you want simplified or traditional characters and input chinese text')
-        print('For simplified: chinese2wordlist.py s 我')
-        print('For traditional: chinese2wordlist.py t 我')
-        exit()
+    args = parser.parse_args()
 
-    response_type = ResponseType.MARKDOWN
-    try:
-        if sys.argv[3] is 'json':
-            response_type = ResponseType.JSON
-        if sys.argv[3] is 'markdown':
-            response_type = ResponseType.MARKDOWN
-        # In case we want to add more
-
-    except IndexError:
-        pass
-
-    if sys.argv[1] in ['t', 'trad', 'traditional']:
-        chineseWordList = Chinese2WordList(CharacterType.TRADITIONAL, sys.argv[2])
-        print(chineseWordList.response(response_type))
-    elif sys.argv[1] in ['s', 'simp', 'simplified']:
-        chineseWordList = Chinese2WordList(CharacterType.SIMPLIFIED, sys.argv[2])
-        print(chineseWordList.response(response_type))
-    else:
-        print('Wrong character type:', sys.argv[1])
-        exit()
+    chinese_word_list = Chinese2WordList(args.chinese, args.character_type, args.response_type, args.language)
+    print(chinese_word_list.response())
