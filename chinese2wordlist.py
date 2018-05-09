@@ -46,7 +46,7 @@ class Chinese2WordList:
         for items in self.smart_search_characters.items():
             pool = ThreadPool(4)
             result = pool.map(self._search_character_in_dictionary, items[1])
-            self.translated_dictionary_entries[items[0]] = ([x for x in result if x])
+            self.translated_dictionary_entries[items[0]] = ([x[0] for x in result if x])
 
     def _search_character_in_dictionary(self, character):
 
@@ -60,7 +60,6 @@ class Chinese2WordList:
             for line in dictionary:
                 match = pattern.match(line)
                 if match:
-                    # self.translated_dictionary_entries[key].append(line)
                     result.append(line)
 
         return result
@@ -138,7 +137,6 @@ if __name__ == "__main__":
                         help='language to translate to (en or nl)')
 
     args = parser.parse_args()
-
 
     chinese_word_list = Chinese2WordList(args.chinese, args.character_type, args.response_type, args.language)
     print(chinese_word_list.response())

@@ -47,6 +47,7 @@ With xargs appending to a file
 You might also want to trim the file
 > `cat input.txt | tr -d " \t\n\r" | xargs -n 1 python chinese2wordlist.py`
 
+
 ### Info
 
 Uses CEDICT for Chinese to English
