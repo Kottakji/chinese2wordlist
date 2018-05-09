@@ -3,8 +3,9 @@
 import re
 import json
 import argparse
+import timeit
 from collections import defaultdict
-
+from multiprocessing.dummy import Pool as ThreadPool
 """
 Input chinese text to return a word list to use with learning
 For example use python chinese2wordlist.py traditional 我是荷蘭人 
@@ -43,19 +44,26 @@ class Chinese2WordList:
 
     def _search_dictionary_via_smart_search(self):
         for items in self.smart_search_characters.items():
-            for character in items[1]:
-                if character not in self.search:
-                    self._search_character_in_dictionary(items[0], character)
-                self.searched = character
+            pool = ThreadPool(4)
+            result = pool.map(self._search_character_in_dictionary, items[1])
+            self.translated_dictionary_entries[items[0]] = ([x for x in result if x])
 
-    def _search_character_in_dictionary(self, key, character):
+    def _search_character_in_dictionary(self, character):
+
+        if character in self.search:
+            return None
+        self.search.append(character)
+
         pattern = self._generate_search_regex(character)
-
+        result = []
         with open('dictionary/cedict_1_0_ts_utf-8_mdbg.txt', 'r') as dictionary:
             for line in dictionary:
-                result = pattern.match(line)
-                if result:
-                    self.translated_dictionary_entries[key].append(line)
+                match = pattern.match(line)
+                if match:
+                    # self.translated_dictionary_entries[key].append(line)
+                    result.append(line)
+
+        return result
 
     def _generate_search_regex(self, character):
         pattern_string = self._get_character_type_regex()
@@ -130,6 +138,7 @@ if __name__ == "__main__":
                         help='language to translate to (en or nl)')
 
     args = parser.parse_args()
+
 
     chinese_word_list = Chinese2WordList(args.chinese, args.character_type, args.response_type, args.language)
     print(chinese_word_list.response())
