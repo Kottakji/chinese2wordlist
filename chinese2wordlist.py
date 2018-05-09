@@ -46,15 +46,15 @@ class Chinese2WordList:
         for items in self.smart_search_characters.items():
             pool = ThreadPool(4)
             result = pool.map(self._search_character_in_dictionary, items[1])
-            self.translated_dictionary_entries[items[0]] = ([x[0] for x in result if x])
+            self.translated_dictionary_entries[items[0]] = ([item for sublist in result for item in sublist])
 
     def _search_character_in_dictionary(self, character):
-
         if character in self.search:
             return None
         self.search.append(character)
 
         pattern = self._generate_search_regex(character)
+
         result = []
         with open('dictionary/cedict_1_0_ts_utf-8_mdbg.txt', 'r') as dictionary:
             for line in dictionary:
@@ -102,6 +102,7 @@ class Chinese2WordList:
 
         for items in values:
             for item in items:
+
                 traditional, simplified, pinyin, translation = self._extract_line_to_definitions(item)
 
                 if self.character_type == 'traditional':
