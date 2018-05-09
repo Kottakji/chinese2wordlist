@@ -45,15 +45,15 @@ class Chinese2WordList:
         for items in self.smart_search_characters.items():
             pool = ThreadPool(4)
             result = pool.map(self._search_character_in_dictionary, items[1])
-            self.translated_dictionary_entries[items[0]] = ([item for sublist in result for item in sublist])
+            self.translated_dictionary_entries[items[0]] = ([item for sublist in result if sublist for item in sublist if item])
 
     def _search_character_in_dictionary(self, character):
+
         if character in self.search:
             return None
         self.search.append(character)
 
         pattern = self._generate_search_regex(character)
-
         result = []
         with open('dictionary/cedict_1_0_ts_utf-8_mdbg.txt', 'r') as dictionary:
             for line in dictionary:
@@ -79,7 +79,7 @@ class Chinese2WordList:
         return [traditional, simplified, pinyin, definition]
 
     def _get_character_type_regex(self):
-        if self.character_type is 'traditional':
+        if self.character_type == 'traditional':
             return '(character) .+? \[.+?\] .+'
         return '.+? (character) \[.+?\] .+'
 
