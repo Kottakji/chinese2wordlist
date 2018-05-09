@@ -85,7 +85,7 @@ class Chinese2WordList:
 
     def response(self):
         items = sorted(self.translated_dictionary_entries.items(), key=lambda item: item[0])
-        values = [item[1] for item in items]
+        values = [item[1] for item in items if item]
         if self.response_type in ['markdown', 'm']:
             return self._response_markdown(values)
         if self.response_type in ['json']:
