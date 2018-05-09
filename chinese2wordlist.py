@@ -103,13 +103,9 @@ class Chinese2WordList:
             for item in items:
                 traditional, simplified, pinyin, translation = self._extract_line_to_definitions(item)
 
-                if self.character_type == 'traditional':
-                    character = traditional
-                else:
-                    character = simplified
-
-                response.append("| {character} | {pinyin} | {translation} |".format(
-                    character=character,
+                response.append("| {traditional} | {simplified} | {pinyin} | {translation} |".format(
+                    simplified=simplified,
+                    traditional=traditional,
                     pinyin=pinyin,
                     translation=translation
                 ))
@@ -122,20 +118,20 @@ if __name__ == "__main__":
     parser.add_argument('chinese',
                         metavar='chinese',
                         help='chinese text')
-    parser.add_argument('--character-type',
+    parser.add_argument('--character-input-type',
                         metavar='(traditional or simplified)',
                         default='simplified',
-                        help='traditional or simplified')
+                        help='input type of the characters')
     parser.add_argument('--response-type',
                         metavar='json or markdown',
                         default='json',
-                        help='return type (json or markdown)')
+                        help='return type')
     parser.add_argument('--language',
                         metavar='(en or nl)',
                         default='en',
-                        help='language to translate to (en or nl)')
+                        help='language to translate to')
 
     args = parser.parse_args()
 
-    chinese_word_list = Chinese2WordList(args.chinese, args.character_type, args.response_type, args.language)
+    chinese_word_list = Chinese2WordList(args.chinese, args.character_input_type, args.response_type, args.language)
     print(chinese_word_list.response())

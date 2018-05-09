@@ -7,7 +7,8 @@ Python package to convert chinese text to a word list.
 
 ### Usage
 ```
-usage: chinese2wordlist.py [-h] [--character-type traditional or simplified)]
+usage: chinese2wordlist.py [-h]
+                           [--character-input-type traditional or simplified)]
                            [--response-type json or markdown]
                            [--language (en or nl]
                            chinese
@@ -19,12 +20,13 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --character-type (traditional or simplified)
-                        traditional or simplified
+  --character-input-type (traditional or simplified)
+                        input type of the characters
   --response-type json or markdown
-                        return type (json or markdown)
+                        return type
   --language (en or nl)
-                        language to translate to (en or nl)
+                        language to translate to
+
 
 ```
 
@@ -33,7 +35,7 @@ Returns a json response, for simplified characters, in English
 > `python chinese2wordlist.py 我是荷蘭人 `
 
 With arguments for a markdown response, with traditional characters, in Dutch
-> `python chinese2wordlist.py 我是荷蘭人 --response-type=markdown --character-type=traditional --language=nl`
+> `python chinese2wordlist.py 我是荷蘭人 --response-type=markdown --character-input-type=traditional --language=nl`
 
 Or with xargs
 > `echo  '我是' | xargs python chinese2wordlist.py` 
