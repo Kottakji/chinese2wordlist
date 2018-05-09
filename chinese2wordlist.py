@@ -3,7 +3,6 @@
 import re
 import json
 import argparse
-import timeit
 from collections import defaultdict
 from multiprocessing.dummy import Pool as ThreadPool
 """
@@ -102,7 +101,6 @@ class Chinese2WordList:
 
         for items in values:
             for item in items:
-
                 traditional, simplified, pinyin, translation = self._extract_line_to_definitions(item)
 
                 if self.character_type == 'traditional':
