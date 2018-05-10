@@ -55,13 +55,19 @@ class Chinese2WordList:
 
         pattern = self._generate_search_regex(character)
         result = []
-        with open('dictionary/cedict_1_0_ts_utf-8_mdbg.txt', 'r') as dictionary:
+        with open(self._get_dictionary_location(), 'r') as dictionary:
             for line in dictionary:
                 match = pattern.match(line)
                 if match:
                     result.append(line)
 
         return result
+
+    def _get_dictionary_location(self):
+        if self.language == 'nl':
+            return 'dictionary/cndict_1_0_ts_utf-8_mdbg.txt'
+
+        return 'dictionary/cedict_1_0_ts_utf-8_mdbg.txt'
 
     def _generate_search_regex(self, character):
         pattern_string = self._get_character_type_regex()
