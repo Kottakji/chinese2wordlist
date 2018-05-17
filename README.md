@@ -46,8 +46,6 @@ With xargs from a file
 With xargs appending to a file
 > `cat input.txt |  xargs -n 1 python chinese2wordlist.py --response-type=markdown >> output.txt` 
 
-You might also want to trim the file
-> `cat input.txt | tr -d " \t\n\r" | xargs -n 1 python chinese2wordlist.py`
 
 
 ### Info

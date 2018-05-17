@@ -13,6 +13,7 @@ For example use python chinese2wordlist.py traditional 我是荷蘭人
 
 class Chinese2WordList:
 
+    chinese_text = None
     character_type = None
     response_type = None
     language = None
@@ -24,11 +25,15 @@ class Chinese2WordList:
         self.character_type = character_type
         self.response_type = response_type
         self.language = language
+        self._set_chinese_text(chinese_text)
 
-        self._search_dictionary(chinese_text)
+        self._search_dictionary()
 
-    def _search_dictionary(self, chinese_text):
-        for key, character in enumerate(chinese_text):
+    def _set_chinese_text(self, chinese_text):
+        self.chinese_text = re.sub(r"[^\u4E00-\u9FFF]+", '', chinese_text, flags=re.MULTILINE)
+
+    def _search_dictionary(self):
+        for key, character in enumerate(self.chinese_text):
             self._create_smart_search_list(key, character)
 
         self._search_dictionary_via_smart_search()
